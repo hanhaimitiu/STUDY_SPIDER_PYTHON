@@ -1,0 +1,70 @@
+import re
+import requests
+import time
+
+def get_page(url):
+    #
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0(WindowsNT6.3;Win64;x64)AppleWebKit/537.36(KHTML,likeGecko)Chrome/68.0.3440.106Safari/537.36"
+        }
+        req = requests.get(url, headers=headers)
+        if req.status_code == 200:
+            return req.text
+        return None
+    except RequestException:
+        return None
+
+def parse_one_page(html):
+    p1 = '.*?table.*?javascript.*?<br/>(.*?)<div.*?'
+    #p2 = '.*?footer.*?<p>(.*?)<p>(.*?)</div>.*?'
+    next_base = '.*?nextLink.*?href="(.*?)">.*?'
+    pa = re.compile(next_base, re.S)
+    pattern = re.compile(p1, re.S)
+    print(pattern)
+    items = re.findall(pattern, html)
+    before = str(items)
+    after = before.replace('<br/>', '')
+   # print(after)
+    after = after.replace('3000', '')
+    after = after.replace('<br/>', '')
+    after = after.replace('\\u', '')
+
+    str1 = re.findall(pa, html)
+    str2 = 'https://qxs.la'
+    print(str1)
+    print(str2)
+    str1 = str2 + str(str1)
+    str1 = str1.replace("'", "")
+    str1 = str1.replace("[", "")
+    str1 = str1.replace("]", "")
+    final = str1
+    with open('完美世界.txt', 'a', encoding='utf-8') as f:
+        f.write(after)
+    return final
+
+
+def next_page(html):
+    next_base = '.*?nextLink.*?href="(.*?)">.*?'
+    pa = re.compile(next_base, re.S)
+    str1 = re.findall(pa, html)
+    str2 = 'https://qxs.la'
+    print(str1)
+    print(str2)
+    str1 = str2 + str(str1)
+    str1 = str1.replace("'", "")
+    str1 = str1.replace("[", "")
+    str1 = str1.replace("]", "")
+    final = str1
+    return final
+
+
+if __name__ == '__main__':
+    url = 'https://qxs.la/164232/14056849/'
+    end = 'https://qxs.la/end.htm?aid=164232&cid=56893876'
+    while True:
+        html = get_page(url)
+        url = parse_one_page(html)
+        if url == end:
+            break
+        time.sleep(1)
